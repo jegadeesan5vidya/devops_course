@@ -1,5 +1,5 @@
 #This is the workflow name/label which will be shown in the github action cy
-name:build-and-lint 
+name: build-and-lint 
 
 #Define below triggers when this workflow should run
 #Trigger the workflow whenever there is a change to the main and dev branches
@@ -7,44 +7,46 @@ name:build-and-lint
 on: 
   push: 
     branches: [main, dev]
-  pull: 
+  pull_request: 
     branches: [main, dev]
 
 # Define jobs here (can define multiple jobs)
 jobs: 
   build-and-lint:
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
   steps: 
-    -name: Checkout Repo
-    -uses: actions/checkout@v3
-
-    -name: Setup Node
-    -uses: actions/setup-node@v3
-    with: 
-      node-version: 20
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+    - name: Setup Node
+    - uses: actions/setup-node@v3
+      with: 
+        node-version: 20
     
-    -name: Install backend dependencies
-    working-directory: server
-    run: npm ci
+    - name: Install backend dependencies
+      working-directory: server
+      run: npm ci
 
-    -name: Lint backend
-    working-directory: server
-    run: npm run lint -- --max-warnings=0
+    - name: Lint backend
+      working-directory: server
+      run: npm run lint -- --max-warnings=0
 
-    -name: Install frontend dependencies
-    working-directory: client
-    run: npm ci
+    - name: Install frontend dependencies
+      working-directory: client
+      run: npm ci
 
-    -name: Lint frontend
-    working-directory: client
-    run: npm run lint -- --max-warnings=0
+    - name: Lint frontend
+      working-directory: client
+      run: npm run lint -- --max-warnings=0
 
-    -name Build backend image 
-    working-directory: server
-    run: docker network create mern-net, docker build -t mern-backend .
+    - name: Build backend image
+      working-directory: server
+      run: |
+      docker network create mern-net || true
+      docker build -t mern-backend .
 
-    -name Build frontend image
-    working-directory: client
-    run: docker build -t mern-frontend --build-arg VITE_API_URL=http://localhost:5000/api .
+    - name: Build frontend image
+      working-directory: client
+      run: |
+      docker build -t mern-frontend --build-arg VITE_API_URL=http://localhost:5000/api .
 
