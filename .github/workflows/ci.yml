@@ -49,3 +49,43 @@ jobs:
         working-directory: client
         run: |
           docker build -t mern-frontend --build-arg VITE_API_URL=http://localhost:5000/api .
+  deploy:
+    needs: build-and-lint
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps: 
+      - name: checkout (optional)
+        uses: actions/checkout@v4
+      
+      - name: Add EC2 host to known hosts
+        run: | 
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+        env: 
+          EC2_HOST: ${{ screts.EC2_HOST }}
+
+      - name: Write SSH Key
+        run: |
+          echo "${EC2_KEY}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+        env:
+          EC2_KEY: ${{ screts.EC2_KEY }}
+
+      - name: Deploy on EC2 (git pull + docker compose up -d --build)
+        env: 
+          EC2_HOST: ${{ screts.EC2_HOST }}
+          EC2_USER: ${{ screts.EC2_USER }}
+          EC2_APP_DIR: ${{ screts.EC2_APP_DIR }}
+        run: |
+          ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
+            set -e
+            cd "${EC2_APP_DIR}"
+
+            git fetch --all
+            git reset --hard origin/main
+
+            docker compose up -d --build
+            docker image prune -f
+            docker compose ps
+          EOF
+
