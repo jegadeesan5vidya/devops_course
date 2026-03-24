@@ -62,20 +62,20 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
         env: 
-          EC2_HOST: ${{ screts.EC2_HOST }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
 
       - name: Write SSH Key
         run: |
           echo "${EC2_KEY}" > ec2_key.pem
           chmod 600 ec2_key.pem
         env:
-          EC2_KEY: ${{ screts.EC2_KEY }}
+          EC2_KEY: ${{ secrets.EC2_KEY }}
 
       - name: Deploy on EC2 (git pull + docker compose up -d --build)
         env: 
-          EC2_HOST: ${{ screts.EC2_HOST }}
-          EC2_USER: ${{ screts.EC2_USER }}
-          EC2_APP_DIR: ${{ screts.EC2_APP_DIR }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_APP_DIR: ${{ secrets.EC2_APP_DIR }}
         run: |
           ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
             set -e
