@@ -3,8 +3,10 @@ services:
     image: mongo:6.0
     container_name: mongo
     restart: unless-stopped
+    ports:
+      - "27017:27017"
     volumes: 
-      - mongo-data:/data/db
+      - demo-vol:/data/db
     networks: 
       - app-net
 
@@ -40,7 +42,8 @@ services:
       - app-net
   
 volumes: 
-  mongo-data:
+  demo-vol:
+    external: true
   
 networks: 
   app-net: 
