@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p server
-                cat server/.env << EOF
+                cat > server/.env << EOF
                 PORT=$PORT
                 MONGO_URI=$MONGO_URL
                 EOF
