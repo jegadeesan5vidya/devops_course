@@ -5,7 +5,7 @@ pipeline {
         FRONTEND_IMAGE= "mern-frontend:jenkins"
         BACKEND_IMAGE= "mern-backend:jenkins"
         PORT= "5000"
-        MONGO_URI= "mongodb://demo-mongo:27017/taskdb"
+        MONGO_URI= "mongodb://mongo:27017/taskdb"
     }
 
     stages {
