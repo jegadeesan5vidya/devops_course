@@ -21,7 +21,7 @@ pipeline {
                 mkdir -p server
                 cat > server/.env << EOF
                 PORT=$PORT
-                MONGO_URI=$MONGO_URL
+                MONGO_URI=$MONGO_URI
                 EOF
                 '''
             }
