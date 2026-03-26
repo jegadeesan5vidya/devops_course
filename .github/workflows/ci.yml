@@ -86,10 +86,9 @@ jobs:
 
             docker compose up -d --build
             docker image prune -f
-            docker compose ps
             echo 'Show running containers (-)'
-            docker ps
-            echo 'backend logs'
+            docker compose ps
+            echo 'backend & frontend logs'
             docker logs backend || true
             docker logs frontend || true
           EOF
