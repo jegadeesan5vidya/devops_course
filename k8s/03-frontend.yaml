@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: mern-app-devops
+  labels: 
+    app: frontend
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: frontend
+  # Templates are specifications for the pod on how it should be created
+  template: 
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers: 
+        - name: frontend
+          image: frontend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5173
+
+# Below --- is the yaml document separator, tells that we are writing another new resource in the same file
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: frontend
+  namespace: mern-app-devops
+spec:
+  selector: 
+    app: frontend
+  ports: 
+    - port: 5173
+      targetPort: 5173
+  type: ClusterIP

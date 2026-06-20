@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongoclear
+  namespace: mern-app-devops
+  labels: 
+    app: mongo
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: mongo
+  # Templates are specifications for the pod on how it should be created
+  template: 
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers: 
+        - name: mongo
+          image: mongo:6.0
+          ports:
+            - containerPort: 27017
+          # Containers only mount the below volume
+          volumeMounts:
+            - name: demo-vol
+              mountPath: /data/db
+      # Volumes are defined at the Pod level, not container level
+      volumes: 
+        - name: demo-vol
+        # emptyDir: {}
+          # emptyDir: {} does not attach any persistent volume claim to the mongo pod, so task data will
+          # be viped out if the pod deleted/crashed, instead create a pvc and attact it here
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+
+# Below --- is the yaml document separator, tells that we are writing another new resource in the same file
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mongo
+  namespace: mern-app-devops
+spec:
+  selector: 
+    app: mongo
+  ports: 
+    - port: 27017
+      targetPort: 27017
+  type: ClusterIP
