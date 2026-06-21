@@ -16,6 +16,14 @@ pipeline {
             }
         }
 
+        stage('Make compose wrapper executable') {
+            steps {
+                sh '''
+                chmod +x run_compose.sh
+                '''
+            }
+        }
+
         stage('Prepare .env') {
             steps {
                 sh '''
