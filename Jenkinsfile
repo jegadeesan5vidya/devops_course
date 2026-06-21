@@ -36,6 +36,17 @@ pipeline {
             }
         }
 
+        stage('Cleanup old containers and images') {
+            steps {
+                sh '''
+                echo "Cleaning up old containers and images (-)"
+                docker compose down || true
+                docker system prune -af || true
+                docker volume prune -f || true
+                '''
+            }
+        }
+
         stage('Build docker images for server and client') {
             steps {
                 sh '''
