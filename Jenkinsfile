@@ -36,18 +36,6 @@ pipeline {
             }
         }
 
-        stage('Cleanup old app containers') {
-            steps {
-                sh '''
-                echo "Stopping and removing old MERN containers (-)"
-                docker compose down || true
-
-                echo "Removing old app images (-)"
-                docker rmi mern-frontend mern-backend || true
-                '''
-            }
-        }
-
         stage('Build docker images for server and client') {
             steps {
                 sh '''
@@ -63,18 +51,8 @@ pipeline {
         stage('Run images with docker compose') {
             steps {
                 sh '''
-                echo "Starting MERN app with docker compose (-)"
-                DOCKER=/usr/bin/docker
-
-                # IMPORTANT: ignore validator failure
-                $DOCKER compose up -d || true
-
-                echo 'Show running containers (-)'
-                $DOCKER ps
-
-                echo 'backend logs'
-                $DOCKER logs demo-backend || true
-                $DOCKER logs demo-frontend || true
+                echo "Rebuilding and recreating containers (-)"
+                docker compose up -d --build --force-recreate
                 '''
             }
         }
