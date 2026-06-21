@@ -36,13 +36,14 @@ pipeline {
             }
         }
 
-        stage('Cleanup old containers and images') {
+        stage('Cleanup old app containers') {
             steps {
                 sh '''
-                echo "Cleaning up old containers and images (-)"
+                echo "Stopping and removing old MERN containers (-)"
                 docker compose down || true
-                docker system prune -af || true
-                docker volume prune -f || true
+
+                echo "Removing old app images (-)"
+                docker rmi mern-frontend mern-backend || true
                 '''
             }
         }
