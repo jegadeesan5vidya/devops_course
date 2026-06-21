@@ -43,7 +43,7 @@ pipeline {
                 docker build -t $BACKEND_IMAGE ./server
 
                 echo 'Building frontend docker image (-)'
-                docker build -t $FRONTEND_IMAGE ./client --build-arg VITE_APP_URL=http://demo-backend:5000/api
+                docker build -t $FRONTEND_IMAGE ./client --build-arg VITE_APP_URL=http://localhost:5000/api
                 '''
             }
         }
