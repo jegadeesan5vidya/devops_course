@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Cleaning up old containers..."
-                docker compose down || true
+                docker-compose down || true
                 docker system prune -f || true
                 '''
             }
