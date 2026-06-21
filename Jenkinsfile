@@ -77,16 +77,7 @@ pipeline {
                 curl -f http://localhost:5000/health || true
                 '''
             }
-        }
-
-        stage('Run  images with docker compose') {
-            steps {
-                sh '''
-                echo Starting MERN app with docker compose (-)
-                docker compose up -d || true
-                '''
-            }
-        }
+        }       
     }
 
     post {
