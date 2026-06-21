@@ -20,7 +20,12 @@ app.use('/api/tasks', taskRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ message: 'Server is running!' });
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'up' : 'down';
+
+  res.status(200).json({
+    backend: 'up',
+    mongo: mongoStatus
+  });
 });
 
 // Error handling middleware
@@ -34,22 +39,15 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Database connection
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Database connection error:', error);
-    process.exit(1);
-  });
+
+const connectWithRetry = require('./db');
+
+// Start DB connection with retry logic
+connectWithRetry();
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Mongo DB Server is running on port ${PORT}`);
+});
 
 // Graceful shutdown
 process.on('SIGINT', async () => {

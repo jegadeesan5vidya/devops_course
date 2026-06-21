@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_IMAGE= "mern-frontend:jenkins"
-        BACKEND_IMAGE= "mern-backend:jenkins"
+        BUILD_TAG = "${env.BUILD_NUMBER}"
+        FRONTEND_IMAGE = "mern-frontend:${BUILD_TAG}"
+        BACKEND_IMAGE  = "mern-backend:${BUILD_TAG}"
         PORT= "5000"
         MONGO_URI= "mongodb://mongo:27017/taskdb"
     }
@@ -27,6 +28,16 @@ pipeline {
             }
         }
 
+        stage('Cleanup') {
+            steps {
+                sh '''
+                echo "Cleaning up old containers..."
+                docker compose down || true
+                docker system prune -f || true
+                '''
+            }
+        }
+
         stage('Build docker images for server and client') {
             steps {
                 sh '''
@@ -45,11 +56,30 @@ pipeline {
                 echo 'Show running containers (-)'
                 docker ps
                 echo 'backend logs'
-                docker logs backend || true
-                docker logs frontend || true
+                docker logs demo-backend || true
+                docker logs demo-frontend || true
+                '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                echo "Checking backend health..."
+                sleep 10
+                curl -f http://localhost:5000/health || (echo "Backend health check failed" && exit 1)
                 '''
             }
         }
     }
 
+    post {
+        success {
+            echo "✅ MERN resilience pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed — check container logs for details."
+            sh 'docker ps -a'
+        }
+    }
 }

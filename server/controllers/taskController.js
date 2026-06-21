@@ -1,89 +1,74 @@
 const Task = require('../models/Task');
+const createBreaker = require('../breaker');
+
+// Wrap DB operations with circuit breaker
+const getTasksBreaker = createBreaker(() => Task.find().sort({ createdAt: -1 }));
+const createTaskBreaker = createBreaker((data) => Task.create(data));
+const deleteTaskBreaker = createBreaker((id) => Task.findByIdAndDelete(id));
 
 // Get all tasks
 const getAllTasks = async (req, res) => {
-  try {
-    const tasks = await Task.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      count: tasks.length,
-      data: tasks,
-    });
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch tasks',
-    });
+  const result = await getTasksBreaker.fire();
+
+  if (result.success === false) {
+    return res.status(503).json(result);
   }
+
+  res.status(200).json({
+    success: true,
+    count: result.length,
+    data: result,
+  });
 };
 
 // Create a new task
 const createTask = async (req, res) => {
-  try {
-    const { title, description } = req.body;
+  const { title, description } = req.body;
 
-    // Validation
-    if (!title || !description) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title and description are required',
-      });
-    }
-
-    const task = await Task.create({
-      title: title.trim(),
-      description: description.trim(),
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Task created successfully',
-      data: task,
-    });
-  } catch (error) {
-    console.error('Error creating task:', error);
-
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((err) => err.message);
-      return res.status(400).json({
-        success: false,
-        message: messages.join(', '),
-      });
-    }
-
-    res.status(500).json({
+  if (!title || !description) {
+    return res.status(400).json({
       success: false,
-      message: 'Failed to create task',
+      message: 'Title and description are required',
     });
   }
+
+  const result = await createTaskBreaker.fire({
+    title: title.trim(),
+    description: description.trim(),
+  });
+
+  if (result.success === false) {
+    return res.status(503).json(result);
+  }
+
+  res.status(201).json({
+    success: true,
+    message: 'Task created successfully',
+    data: result,
+  });
 };
 
 // Delete a task
 const deleteTask = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const task = await Task.findByIdAndDelete(id);
+  const result = await deleteTaskBreaker.fire(id);
 
-    if (!task) {
-      return res.status(404).json({
-        success: false,
-        message: 'Task not found',
-      });
-    }
+  if (result.success === false) {
+    return res.status(503).json(result);
+  }
 
-    res.status(200).json({
-      success: true,
-      message: 'Task deleted successfully',
-    });
-  } catch (error) {
-    console.error('Error deleting task:', error);
-    res.status(500).json({
+  if (!result) {
+    return res.status(404).json({
       success: false,
-      message: 'Failed to delete task',
+      message: 'Task not found',
     });
   }
+
+  res.status(200).json({
+    success: true,
+    message: 'Task deleted successfully',
+  });
 };
 
 module.exports = {
