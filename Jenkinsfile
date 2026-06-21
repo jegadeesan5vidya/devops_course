@@ -79,14 +79,14 @@ pipeline {
             }
         }
 
-        stage('Run  images with docker compose') {
-            steps {
-                sh '''
-                echo Starting MERN app with docker compose (-)
-                docker compose up -d || true
-                '''
-            }
-        }
+        // stage('Run  images with docker compose') {
+        //     steps {
+        //         sh '''
+        //         echo Starting MERN app with docker compose (-)
+        //         docker compose up -d || true
+        //         '''
+        //     }
+        // }
     }
 
     post {
