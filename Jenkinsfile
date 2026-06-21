@@ -32,8 +32,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Cleaning up old containers..."
-                docker compose down || true
-                docker system prune -f || true
+                /usr/bin/docker compose down || true
                 '''
             }
         }
@@ -48,16 +47,17 @@ pipeline {
                 '''
             }
         }
+        
         stage('Run images with docker compose') {
             steps {
                 sh '''
                 echo "Starting MERN app with docker compose (-)"
-                docker compose up -d
+                /usr/bin/docker compose up -d
                 echo 'Show running containers (-)'
-                docker ps
+                /usr/bin/docker ps
                 echo 'backend logs'
-                docker logs demo-backend || true
-                docker logs demo-frontend || true
+                /usr/bin/docker logs demo-backend || true
+                /usr/bin/docker logs demo-frontend || true
                 '''
             }
         }
