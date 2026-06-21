@@ -36,15 +36,15 @@ pipeline {
             }
         }
 
-        stage('Cleanup') {
-            steps {
-                sh '''
-                echo "Cleaning up old containers..."
-                DOCKER=/usr/bin/docker
-                $DOCKER compose down || true
-                '''
-            }
-        }
+        // stage('Cleanup') {
+        //     steps {
+        //         sh '''
+        //         echo "Cleaning up old containers..."
+        //         DOCKER=/usr/bin/docker
+        //         $DOCKER compose down || true
+        //         '''
+        //     }
+        // }
 
         stage('Build docker images for server and client') {
             steps {
