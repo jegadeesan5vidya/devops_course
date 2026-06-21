@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Cleaning up old containers..."
-                docker-compose down || true
+                docker compose down || true
                 docker system prune -f || true
                 '''
             }
@@ -52,7 +52,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Starting MERN app with docker compose (-)"
-                docker-compose up -d
+                docker compose up -d
                 echo 'Show running containers (-)'
                 docker ps
                 echo 'backend logs'
